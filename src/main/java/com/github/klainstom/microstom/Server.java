@@ -1,6 +1,7 @@
 package com.github.klainstom.microstom;
 
 import com.github.klainstom.microstom.commands.Commands;
+import com.github.klainstom.microstom.terminal.TerminalConsole;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.Git;
@@ -16,8 +17,26 @@ import java.nio.file.Files;
 import java.util.Objects;
 
 public class Server {
-    public static final String VERSION = "&version";
-    private static final String START_SCRIPT_FILENAME = "start.sh";
+    private static final String START_SCRIPT_FILENAME_LINUX = "start.sh";
+    private static final String START_SCRIPT_FILENAME_WINDOWS = "start.bat";
+
+    private static void setupStartupScript() throws IOException {
+        final boolean isWindows = System.getProperty("os.name").startsWith("Windows");
+        final String scriptFileName = isWindows ? START_SCRIPT_FILENAME_WINDOWS : START_SCRIPT_FILENAME_LINUX;
+        final String startCommand = isWindows ? "start.bat" : "start.sh";
+
+        File startScriptFile = new File(scriptFileName);
+
+        if (startScriptFile.isDirectory()) MinecraftServer.LOGGER.warn("Can't create startup script!");
+        if (!startScriptFile.isFile()) {
+            MinecraftServer.LOGGER.info("Create startup script.");
+            Files.copy(
+                    Objects.requireNonNull(Server.class.getClassLoader().getResourceAsStream(scriptFileName)),
+                    startScriptFile.toPath());
+            MinecraftServer.LOGGER.info("Use '{}' to start the server.", startCommand);
+            System.exit(0);
+        }
+    }
 
     public static void main(String[] args) throws IOException {
         Settings.read();
@@ -30,27 +49,18 @@ public class Server {
         if (Settings.isTerminalDisabled())
             System.setProperty("minestom.terminal.disabled", "");
 
-        if (! (args.length > 0 && args[0].equalsIgnoreCase("-q"))) {
+        if (!(args.length > 0 && args[0].equalsIgnoreCase("-q"))) {
             MinecraftServer.LOGGER.info("====== VERSIONS ======");
-            MinecraftServer.LOGGER.info("Java: " + Runtime.version());
-            MinecraftServer.LOGGER.info("&Name: " + VERSION);
-            MinecraftServer.LOGGER.info("Minestom commit: " + Git.commit());
+            MinecraftServer.LOGGER.info("Java: {}", Runtime.version());
+            MinecraftServer.LOGGER.info("&Name: &version");
+            MinecraftServer.LOGGER.info("Minestom commit: {}", Git.commit());
             MinecraftServer.LOGGER.info("Supported protocol: %d (%s)".formatted(MinecraftServer.PROTOCOL_VERSION, MinecraftServer.VERSION_NAME));
             MinecraftServer.LOGGER.info("======================");
         }
 
         if (args.length > 0 && args[0].equalsIgnoreCase("-v")) System.exit(0);
 
-        File startScriptFile = new File(START_SCRIPT_FILENAME);
-        if (startScriptFile.isDirectory()) MinecraftServer.LOGGER.warn("Can't create startup script!");
-        if (!startScriptFile.isFile()) {
-            MinecraftServer.LOGGER.info("Create startup script.");
-            Files.copy(
-                    Objects.requireNonNull(Server.class.getClassLoader().getResourceAsStream(START_SCRIPT_FILENAME)),
-                    startScriptFile.toPath());
-            MinecraftServer.LOGGER.info("Use './start.sh' to start the server.");
-            System.exit(0);
-        }
+        setupStartupScript();
 
         // Actually start server
         MinecraftServer server = MinecraftServer.init();
@@ -83,5 +93,7 @@ public class Server {
         MinecraftServer.LOGGER.info("Listening on " + Settings.getServerIp() + ":" + Settings.getServerPort());
 
         server.start(Settings.getServerIp(), Settings.getServerPort());
+
+        new TerminalConsole().start();
     }
 }
