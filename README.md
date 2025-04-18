@@ -31,10 +31,10 @@ cd microstom
 ```
 The server jar will be located at `build/libs/Microstom-<VERSION>.jar`.
 
-Note that for compiling you need to use a JDK 17.
+Note that for compiling you need to use a JDK ~~17~~ 21.
 
 ## Usage
-To run the server you need to have a Java 17 runtime installed.
+To run the server you need to have a Java ~~17~~ 21 runtime installed.
 Use the following command to start the server for the first time.
 ```shell
 java -jar Microstom-<VERSION>.jar
@@ -57,7 +57,7 @@ You have to restart the server for changes in there to take effect.
 Note that this server only supports 1.19.2 clients on version 6.0.0, 1.18.2 clients on version 5.0.0 and 1.18/1.18.1 on version 4.0.0. To allow other/multiple versions to connect you need to use a proxy with plugins like ViaVersion.
 
 ## Restarting
-Restarting the server calls the `./start.sh` script.
+Restarting the server calls the `./start.sh` or `./start.bat` script.
 The generated script will restart the server with no way to access the console.
 So keep in mind that you will need an extension providing remote access or use tmux/screen in the `start.sh` to access the console.
 
