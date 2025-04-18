@@ -38,17 +38,7 @@ public class Server {
         }
     }
 
-    public static void main(String[] args) throws IOException {
-        Settings.read();
-        if (Settings.getTps() != null)
-            System.setProperty("minestom.tps", Settings.getTps());
-        if (Settings.getChunkViewDistance() != null)
-            System.setProperty("minestom.chunk-view-distance", Settings.getChunkViewDistance());
-        if (Settings.getEntityViewDistance() != null)
-            System.setProperty("minestom.entity-view-distance", Settings.getEntityViewDistance());
-        if (Settings.isTerminalDisabled())
-            System.setProperty("minestom.terminal.disabled", "");
-
+    private static void printVersions(String[] args) {
         if (!(args.length > 0 && args[0].equalsIgnoreCase("-q"))) {
             MinecraftServer.LOGGER.info("====== VERSIONS ======");
             MinecraftServer.LOGGER.info("Java: {}", Runtime.version());
@@ -59,20 +49,31 @@ public class Server {
         }
 
         if (args.length > 0 && args[0].equalsIgnoreCase("-v")) System.exit(0);
+    }
 
-        setupStartupScript();
+    private static void registerCommands() {
+        var commandManager = MinecraftServer.getCommandManager();
+        commandManager.register(Commands.SHUTDOWN);
+        commandManager.register(Commands.RESTART);
+    }
 
-        // Actually start server
+    private static void startServer() {
+        Settings.read();
+        if (Settings.getTps() != null)
+            System.setProperty("minestom.tps", Settings.getTps());
+        if (Settings.getChunkViewDistance() != null)
+            System.setProperty("minestom.chunk-view-distance", Settings.getChunkViewDistance());
+        if (Settings.getEntityViewDistance() != null)
+            System.setProperty("minestom.entity-view-distance", Settings.getEntityViewDistance());
+        if (Settings.isTerminalDisabled())
+            System.setProperty("minestom.terminal.disabled", "");
+
         MinecraftServer server = MinecraftServer.init();
 
         MinecraftServer.getGlobalEventHandler().addListener(AsyncPlayerConfigurationEvent.class, event -> {
             if (MinecraftServer.getInstanceManager().getInstances().isEmpty())
                 event.getPlayer().kick(Component.text("There is no instance available!", NamedTextColor.RED));
         });
-
-        var commandManager = MinecraftServer.getCommandManager();
-        commandManager.register(Commands.SHUTDOWN);
-        commandManager.register(Commands.RESTART);
 
         switch (Settings.getMode()) {
             case OFFLINE:
@@ -84,10 +85,13 @@ public class Server {
                 BungeeCordProxy.enable();
                 break;
             case VELOCITY:
-                if (!Settings.hasVelocitySecret())
+                if (!Settings.hasVelocitySecret()) {
                     throw new IllegalArgumentException("The velocity secret is mandatory.");
+                }
                 VelocityProxy.enable(Settings.getVelocitySecret());
         }
+
+        registerCommands();
 
         MinecraftServer.LOGGER.info("Running in " + Settings.getMode() + " mode.");
         MinecraftServer.LOGGER.info("Listening on " + Settings.getServerIp() + ":" + Settings.getServerPort());
@@ -95,5 +99,11 @@ public class Server {
         server.start(Settings.getServerIp(), Settings.getServerPort());
 
         new TerminalConsole().start();
+    }
+
+    public static void main(String[] args) throws IOException {
+        printVersions(args);
+        setupStartupScript();
+        startServer();
     }
 }
