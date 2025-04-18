@@ -7,7 +7,7 @@ plugins {
 var displayName = "Microstom"
 
 group = "com.github.klainstom"
-version = "7.0.0"
+version = "8.0.0"
 
 dependencies {
     implementation("net.minestom:minestom-snapshots:fb895cb899") {
