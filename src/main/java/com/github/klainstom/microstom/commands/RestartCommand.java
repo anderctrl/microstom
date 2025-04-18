@@ -10,8 +10,7 @@ import java.io.IOException;
 public class RestartCommand extends Command {
     public RestartCommand() {
         super("restart");
-        setCondition((sender, commandString) -> (sender instanceof ServerSender)
-                || sender.hasPermission(Permissions.RESTART));
+        setCondition((sender, commandString) -> (sender instanceof ServerSender));
         setDefaultExecutor((sender, context) -> {
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 try {
@@ -19,7 +18,7 @@ public class RestartCommand extends Command {
                     MinecraftServer.LOGGER.info("Start new server.");
                 } catch (IOException e) {
                     if (!(sender instanceof ConsoleSender)) sender.sendMessage("Could not restart server.");
-                    LOGGER.error("Could not restart server.", e);
+                    MinecraftServer.LOGGER.error("Could not restart server.", e);
                 }
             }, "RestartHook"));
             MinecraftServer.stopCleanly();

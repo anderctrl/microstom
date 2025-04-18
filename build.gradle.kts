@@ -10,7 +10,9 @@ group = "com.github.klainstom"
 version = "7.0.0"
 
 dependencies {
-    implementation(libs.minestom)
+    implementation("net.minestom:minestom-snapshots:fb895cb899")
+    // https://mvnrepository.com/artifact/org.slf4j/slf4j-simple
+    implementation("org.slf4j:slf4j-simple:2.0.17")
 }
 
 tasks {
@@ -48,6 +50,6 @@ tasks {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 }

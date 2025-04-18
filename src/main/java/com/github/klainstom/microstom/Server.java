@@ -1,12 +1,11 @@
 package com.github.klainstom.microstom;
 
 import com.github.klainstom.microstom.commands.Commands;
-import com.github.klainstom.microstom.commands.Permissions;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.Git;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.event.player.PlayerLoginEvent;
+import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.bungee.BungeeCordProxy;
 import net.minestom.server.extras.velocity.VelocityProxy;
@@ -14,7 +13,6 @@ import net.minestom.server.extras.velocity.VelocityProxy;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Objects;
 
 public class Server {
@@ -50,7 +48,6 @@ public class Server {
             Files.copy(
                     Objects.requireNonNull(Server.class.getClassLoader().getResourceAsStream(START_SCRIPT_FILENAME)),
                     startScriptFile.toPath());
-            Runtime.getRuntime().exec("chmod u+x start.sh");
             MinecraftServer.LOGGER.info("Use './start.sh' to start the server.");
             System.exit(0);
         }
@@ -58,18 +55,14 @@ public class Server {
         // Actually start server
         MinecraftServer server = MinecraftServer.init();
 
-        MinecraftServer.getGlobalEventHandler().addListener(PlayerLoginEvent.class, event -> {
+        MinecraftServer.getGlobalEventHandler().addListener(AsyncPlayerConfigurationEvent.class, event -> {
             if (MinecraftServer.getInstanceManager().getInstances().isEmpty())
                 event.getPlayer().kick(Component.text("There is no instance available!", NamedTextColor.RED));
         });
 
         var commandManager = MinecraftServer.getCommandManager();
-        var consoleSender = commandManager.getConsoleSender();
         commandManager.register(Commands.SHUTDOWN);
         commandManager.register(Commands.RESTART);
-        consoleSender.addPermission(Permissions.SHUTDOWN);
-        consoleSender.addPermission(Permissions.RESTART);
-        MinecraftServer.getExtensionManager().setExtensionDataRoot(Path.of("config"));
 
         switch (Settings.getMode()) {
             case OFFLINE:
