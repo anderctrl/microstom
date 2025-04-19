@@ -16,8 +16,8 @@ dependencies {
 
     // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
     implementation("org.slf4j:slf4j-api:2.0.17")
-    // https://mvnrepository.com/artifact/org.slf4j/jul-to-slf4j
-    implementation("org.slf4j:jul-to-slf4j:2.0.17")
+    // https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core
+    implementation("org.apache.logging.log4j:log4j-core:2.24.3")
     // https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-slf4j2-impl
     implementation("org.apache.logging.log4j:log4j-slf4j2-impl:2.24.3")
     // https://mvnrepository.com/artifact/org.jline/jline-reader
